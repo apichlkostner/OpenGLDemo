@@ -8,7 +8,7 @@ find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
 
 # add the executable
-add_executable(opengltest main.cpp GLEnv.cpp)
+add_executable(opengltest main.cpp GLEnv.cpp GLProgram.cpp)
 
 target_include_directories(opengltest PRIVATE ${PROJECT_SOURCE_DIR}/include
                                 PUBLIC "${PROJECT_BINARY_DIR}"
