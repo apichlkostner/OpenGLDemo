@@ -15,6 +15,13 @@ GLEnv::GLEnv(uint32_t width, uint32_t height, uint32_t s, std::string title) {
   }
 
   glfwMakeContextCurrent(window_);
+
+  GLenum err = glewInit();
+  if (err != GLEW_OK) {
+    glfwTerminate();
+    throw std::runtime_error((const char*)glewGetErrorString(err));
+  }
+
   glfwSetErrorCallback(errorCallback);
 }
 

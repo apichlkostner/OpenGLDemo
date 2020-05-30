@@ -10,46 +10,50 @@
 #include "GLBuffer.h"
 #include "GLEnv.h"
 #include "GLProgram.h"
+#include "Tesselation.h"
 
 static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 static void poll_gl_errors();
 
 int main(int argc, char** argv) {
   GLEnv gl(640, 480, 1, "OpenGL test");
+
+  // callback
   gl.setKeyCallback(keyCallback);
 
-  GLenum err = glewInit();
-  if (err != GLEW_OK) {
-    std::cerr << "Failed to init GLEW " << glewGetErrorString(err) << std::endl;
-    glfwTerminate();
+  // load shaders
+  GLProgram program("/home/arthur/swdev/opengl/krueger/shaders/vertex_shader.glsl",
+                    "/home/arthur/swdev/opengl/krueger/shaders/fragment_shader.glsl");
 
-    return EXIT_FAILURE;
-  }
+  // graphic
+  Tesselation sphere(Tesselation::genSphere({0, 0, -5}, 1, 100, 100));
 
-  GLProgram program("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
+  GLBuffer vbPos(GL_ARRAY_BUFFER);
+  vbPos.setData(sphere.getVertices(), 3);
 
-  std::vector<float> vertices = {-0.6f, -0.4f, -1.0f, 1.0f, 0.0f, 0.0f,  0.6f, -0.4f, -1.0f,
-                                 0.0f,  1.0f,  0.0f,  0.0f, 0.6f, -1.0f, 0.0f, 0.0f,  1.0f};
-
-  GLBuffer vbPos{GL_ARRAY_BUFFER};
-  vbPos.setData(vertices, 6);
+  GLBuffer ib(GL_ELEMENT_ARRAY_BUFFER);
+  ib.setData(sphere.getIndices());
 
   GLint mvpLocation = program.getUniformLocation("MVP");
   GLint posLocation = program.getAttribLocation("vPos");
-  GLint colLocation = program.getAttribLocation("vColor");
+  GLint vColorLocation = program.getAttribLocation("vColor");
 
-  vbPos.connectVertexAttrib(posLocation, 3, 0);
-  vbPos.connectVertexAttrib(colLocation, 3, 3);
+  vbPos.connectVertexAttrib(posLocation, 3);
+  vbPos.connectVertexAttrib(vColorLocation, 3);
 
   glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
+
+  poll_gl_errors();
+
+  //std::cout << "indices: " << sphere.getIndices().size() << " vertices: " << sphere.getVertices().size() << std::endl;
 
   while (!gl.shouldClose()) {
     auto frameSize = gl.getFrameBufferSize();
     float aspect = float(frameSize[0]) / float(frameSize[1]);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     glViewport(0, 0, frameSize[0], frameSize[1]);
+    program.use();
 
     glm::mat4 p =
         glm::perspective(glm::radians<float>(90),  // The vertical Field of View, in radians: the amount of "zoom".
@@ -59,13 +63,12 @@ int main(int argc, char** argv) {
         );
 
     glm::mat4 m = glm::rotate(glm::mat4(1.0f), float(glfwGetTime()), glm::vec3(0.0f, 0.0f, 1.0f));
-
+    
     glm::mat4 mvp = p * m;
 
-    program.use();
     program.setUniform(mvpLocation, mvp);
-
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    
+    glDrawElements(GL_TRIANGLES, sphere.getIndices().size(), GL_UNSIGNED_INT, (void*)0);
 
     gl.endOfFrame();
 

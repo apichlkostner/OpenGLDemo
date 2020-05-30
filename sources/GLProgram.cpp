@@ -2,19 +2,25 @@
 
 GLProgram::GLProgram(std::string const& vertex_shader_filename, std::string const& fragment_shader_filename) {
   // vertex shader
-  GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-
   std::ifstream vertex_shader_file(vertex_shader_filename);
+
+  if (!vertex_shader_file) {
+    throw std::runtime_error("Can't open vertex shader file");
+  }
   std::string vertex_shader_string((std::istreambuf_iterator<char>(vertex_shader_file)),
                                    std::istreambuf_iterator<char>());
   const GLchar* vertex_shader_c = vertex_shader_string.c_str();
 
+  GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertexShader, 1, &vertex_shader_c, NULL);
-  glCompileShader(vertexShader);  
-  check_shader_compile_errors();
+  glCompileShader(vertexShader);
+  check_shader_compile_errors(vertexShader);
 
   // fragment shader
   std::ifstream fragment_shader_file(fragment_shader_filename);
+  if (!fragment_shader_file) {
+    throw std::runtime_error("Can't open fragment shader file");
+  }
   std::string fragment_shader_string((std::istreambuf_iterator<char>(fragment_shader_file)),
                                      std::istreambuf_iterator<char>());
   const GLchar* fragment_shader_c = fragment_shader_string.c_str();
@@ -22,8 +28,7 @@ GLProgram::GLProgram(std::string const& vertex_shader_filename, std::string cons
 
   glShaderSource(fragmentShader, 1, &fragment_shader_c, NULL);
   glCompileShader(fragmentShader);
-  check_shader_compile_errors();
-
+  check_shader_compile_errors(fragmentShader);
   // program
   program_ = glCreateProgram();
   glAttachShader(program_, vertexShader);
@@ -38,7 +43,6 @@ GLProgram::GLProgram(std::string const& vertex_shader_filename, std::string cons
 
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
-
   check_gl_errors();
 }
 
@@ -50,12 +54,12 @@ void GLProgram::setUniform(GLint id, const glm::mat4& matrix) { glUniformMatrix4
 
 void GLProgram::use() { glUseProgram(program_); }
 
-void GLProgram::check_shader_compile_errors() {
+void GLProgram::check_shader_compile_errors(GLuint shader) {
   GLint result = GL_FALSE;
-  int info_log_length;
+  int info_log_length = 0;
 
-  glGetProgramiv(program_, GL_COMPILE_STATUS, &result);
-  glGetProgramiv(program_, GL_INFO_LOG_LENGTH, &info_log_length);
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
+  glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &info_log_length);
   if (info_log_length > 0) {
     std::vector<char> ProgramErrorMessage(info_log_length + 1);
     glGetProgramInfoLog(program_, info_log_length, NULL, &ProgramErrorMessage[0]);
@@ -65,7 +69,7 @@ void GLProgram::check_shader_compile_errors() {
 
 void GLProgram::check_shader_link_errors() {
   GLint result = GL_FALSE;
-  int info_log_length;
+  int info_log_length = 0;
 
   glGetProgramiv(program_, GL_LINK_STATUS, &result);
   glGetProgramiv(program_, GL_INFO_LOG_LENGTH, &info_log_length);

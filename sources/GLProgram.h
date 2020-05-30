@@ -17,7 +17,7 @@ class GLProgram {
   void use();
 
  private:
-  void check_shader_compile_errors();
+  void check_shader_compile_errors(GLuint shader);
   void check_shader_link_errors();
   void check_gl_errors();
   GLuint program_;
