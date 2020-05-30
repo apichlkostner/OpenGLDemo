@@ -1,7 +1,8 @@
-#version 110
+#version 430
 
-varying vec3 color;
+in vec3 fragmentColor;
+out vec4 color;
 
 void main() {
-  gl_FragColor = vec4(color, 1.0);
+  color = vec4(fragmentColor, 1.0);
 }

@@ -7,6 +7,7 @@
 #include <thread>
 #include <vector>
 
+#include "GLBuffer.h"
 #include "GLEnv.h"
 #include "GLProgram.h"
 
@@ -30,26 +31,22 @@ int main(int argc, char** argv) {
   std::vector<float> vertices = {-0.6f, -0.4f, -1.0f, 1.0f, 0.0f, 0.0f,  0.6f, -0.4f, -1.0f,
                                  0.0f,  1.0f,  0.0f,  0.0f, 0.6f, -1.0f, 0.0f, 0.0f,  1.0f};
 
-  GLuint vertexBuffer;
-
-  glGenBuffers(1, &vertexBuffer);
-  glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+  GLBuffer vbPos{GL_ARRAY_BUFFER};
+  vbPos.setData(vertices, 6);
 
   GLint mvpLocation = program.getUniformLocation("MVP");
   GLint posLocation = program.getAttribLocation("vPos");
-  GLint colLocation = program.getAttribLocation("vCol");
+  GLint colLocation = program.getAttribLocation("vColor");
 
-  glEnableVertexAttribArray(posLocation);
-  glVertexAttribPointer(posLocation, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)0);
-  glEnableVertexAttribArray(colLocation);
-  glVertexAttribPointer(colLocation, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 3));
+  vbPos.connectVertexAttrib(posLocation, 3, 0);
+  vbPos.connectVertexAttrib(colLocation, 3, 3);
+
+  glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
 
   while (!gl.shouldClose()) {
     auto frameSize = gl.getFrameBufferSize();
     float aspect = float(frameSize[0]) / float(frameSize[1]);
 
-    glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glViewport(0, 0, frameSize[0], frameSize[1]);
@@ -66,7 +63,7 @@ int main(int argc, char** argv) {
     glm::mat4 mvp = p * m;
 
     program.use();
-    glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, &mvp[0][0]);
+    program.setUniform(mvpLocation, mvp);
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
 

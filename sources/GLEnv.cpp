@@ -2,7 +2,7 @@
 
 GLEnv::GLEnv(uint32_t width, uint32_t height, uint32_t s, std::string title) {
   if (!glfwInit()) {
-    throw(GLException("glfwInit() with erro"));
+    throw(std::runtime_error("glfwInit() didn't work"));
   }
 
   glfwWindowHint(GLFW_SAMPLES, 4);
@@ -11,7 +11,7 @@ GLEnv::GLEnv(uint32_t width, uint32_t height, uint32_t s, std::string title) {
   if (window_ == nullptr) {
     std::cerr << "Failed to open GLFW window." << std::endl;
     glfwTerminate();
-    throw(GLException("glfwInit() with erro"));
+    throw(std::runtime_error("glfwCreateWindow() didn't work"));
   }
 
   glfwMakeContextCurrent(window_);

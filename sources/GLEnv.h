@@ -6,16 +6,6 @@
 #include <iostream>
 #include <string>
 
-class GLException : public std::exception {
- public:
-  GLException(const std::string& what) : what_(what) {}
-
-  virtual const char* what() { return what_.c_str(); }
-
- private:
-  std::string what_;
-};
-
 class GLEnv {
  public:
   GLEnv(uint32_t width, uint32_t height, uint32_t s, std::string title);
