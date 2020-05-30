@@ -14,6 +14,7 @@ class GLProgram {
   GLint getUniformLocation(const std::string& name);
   GLint getAttribLocation(const std::string& name);
   void setUniform(GLint id, const glm::mat4& matrix);
+  void setUniform(GLint id, const glm::vec3& vector);
   void use();
 
  private:

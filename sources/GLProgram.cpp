@@ -52,6 +52,8 @@ GLint GLProgram::getAttribLocation(const std::string& name) { return glGetAttrib
 
 void GLProgram::setUniform(GLint id, const glm::mat4& matrix) { glUniformMatrix4fv(id, 1, GL_FALSE, &matrix[0][0]); }
 
+void GLProgram::setUniform(GLint id, const glm::vec3& vector) { glUniform3fv(id, 1, &vector[0]); }
+
 void GLProgram::use() { glUseProgram(program_); }
 
 void GLProgram::check_shader_compile_errors(GLuint shader) {
