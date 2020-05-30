@@ -31,6 +31,9 @@ int main(int argc, char** argv) {
   GLBuffer vbPos(GL_ARRAY_BUFFER);
   vbPos.setData(sphere.getVertices(), 3);
 
+  GLBuffer vTextureCoord(GL_ARRAY_BUFFER);
+  vTextureCoord.setData(sphere.getTexCoords(), 2);
+
   GLBuffer vNormals(GL_ARRAY_BUFFER);
   vNormals.setData(sphere.getNormals(), 3);
 
@@ -43,10 +46,12 @@ int main(int argc, char** argv) {
   GLint posLocation = program.getAttribLocation("vPos");
   GLint normalLocation = program.getAttribLocation("vNormal");
   GLint vColorLocation = program.getAttribLocation("vColor");
+  GLint vTextureCoordLocation = program.getAttribLocation("vTextureCoord");
 
   vbPos.connectVertexAttrib(posLocation, 3);
   vbPos.connectVertexAttrib(vColorLocation, 3);
   vNormals.connectVertexAttrib(normalLocation, 3);
+  vTextureCoord.connectVertexAttrib(vTextureCoordLocation, 2);
 
   glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
 

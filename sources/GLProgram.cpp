@@ -1,5 +1,7 @@
 #include "GLProgram.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 GLProgram::GLProgram(std::string const& vertex_shader_filename, std::string const& fragment_shader_filename) {
   // vertex shader
   std::ifstream vertex_shader_file(vertex_shader_filename);
@@ -50,9 +52,9 @@ GLint GLProgram::getUniformLocation(const std::string& name) { return glGetUnifo
 
 GLint GLProgram::getAttribLocation(const std::string& name) { return glGetAttribLocation(program_, name.c_str()); }
 
-void GLProgram::setUniform(GLint id, const glm::mat4& matrix) { glUniformMatrix4fv(id, 1, GL_FALSE, &matrix[0][0]); }
+void GLProgram::setUniform(GLint id, const glm::mat4& matrix) { glUniformMatrix4fv(id, 1, GL_FALSE, glm::value_ptr(matrix)); }
 
-void GLProgram::setUniform(GLint id, const glm::vec3& vector) { glUniform3fv(id, 1, &vector[0]); }
+void GLProgram::setUniform(GLint id, const glm::vec3& vector) { glUniform3fv(id, 1, glm::value_ptr(vector)); }
 
 void GLProgram::use() { glUseProgram(program_); }
 
