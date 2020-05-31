@@ -8,6 +8,8 @@
 #include <thread>
 #include <vector>
 
+#include "GLTexture2D.h"
+
 class GLProgram {
  public:
   GLProgram(std::string const& vertex_shader_filename, std::string const& fragment_shader_filename);
@@ -15,6 +17,7 @@ class GLProgram {
   GLint getAttribLocation(const std::string& name);
   void setUniform(GLint id, const glm::mat4& matrix);
   void setUniform(GLint id, const glm::vec3& vector);
+  void setTexture(GLint id, const GLTexture2D& texture, GLuint unit);
   void use();
 
  private:

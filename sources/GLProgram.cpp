@@ -52,9 +52,17 @@ GLint GLProgram::getUniformLocation(const std::string& name) { return glGetUnifo
 
 GLint GLProgram::getAttribLocation(const std::string& name) { return glGetAttribLocation(program_, name.c_str()); }
 
-void GLProgram::setUniform(GLint id, const glm::mat4& matrix) { glUniformMatrix4fv(id, 1, GL_FALSE, glm::value_ptr(matrix)); }
+void GLProgram::setUniform(GLint id, const glm::mat4& matrix) {
+  glUniformMatrix4fv(id, 1, GL_FALSE, glm::value_ptr(matrix));
+}
 
 void GLProgram::setUniform(GLint id, const glm::vec3& vector) { glUniform3fv(id, 1, glm::value_ptr(vector)); }
+
+void GLProgram::setTexture(GLint id, const GLTexture2D& texture, GLuint unit) {
+  glActiveTexture(GL_TEXTURE0 + unit);
+  glBindTexture(GL_TEXTURE_2D, texture.getId());
+  glUniform1i(id, unit);
+}
 
 void GLProgram::use() { glUseProgram(program_); }
 

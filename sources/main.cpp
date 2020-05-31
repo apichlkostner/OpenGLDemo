@@ -10,6 +10,8 @@
 #include "GLBuffer.h"
 #include "GLEnv.h"
 #include "GLProgram.h"
+#include "GLTexture2D.h"
+#include "Image.h"
 #include "Tesselation.h"
 
 static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -22,8 +24,8 @@ int main(int argc, char** argv) {
   gl.setKeyCallback(keyCallback);
 
   // load shaders
-  GLProgram program("/home/arthur/swdev/opengl/krueger/shaders/vertex_shader.glsl",
-                    "/home/arthur/swdev/opengl/krueger/shaders/fragment_shader.glsl");
+  GLProgram program("shaders/vertex_shader.glsl",
+                    "shaders/fragment_shader.glsl");
 
   // graphic
   Tesselation sphere(Tesselation::genSphere({0, 0, 0}, 1, 100, 100));
@@ -40,6 +42,12 @@ int main(int argc, char** argv) {
   GLBuffer ib(GL_ELEMENT_ARRAY_BUFFER);
   ib.setData(sphere.getIndices());
 
+  Image image;
+  image.loadBmp("assets/albedo.bmp");
+  
+  GLTexture2D chessBoard(image.width(), image.height(), image.bits_per_pixel() / 8);  
+  chessBoard.setData(image.data());
+
   GLint mvpLocation = program.getUniformLocation("MVP");
   GLint mLocation = program.getUniformLocation("M");
   GLint lighLocation = program.getUniformLocation("vLightPos");
@@ -47,6 +55,7 @@ int main(int argc, char** argv) {
   GLint normalLocation = program.getAttribLocation("vNormal");
   GLint vColorLocation = program.getAttribLocation("vColor");
   GLint vTextureCoordLocation = program.getAttribLocation("vTextureCoord");
+  GLint textureSamplerLocation = program.getUniformLocation("textureSampler");
 
   vbPos.connectVertexAttrib(posLocation, 3);
   vbPos.connectVertexAttrib(vColorLocation, 3);
@@ -84,12 +93,14 @@ int main(int argc, char** argv) {
     glm::mat4 v = glm::lookAt(glm::vec3{0., 0., 2.}, glm::vec3{0., 0., 0.}, glm::vec3{0., 1., 0.});
 
     glm::mat4 m = glm::rotate(glm::mat4(1.0f), float(glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
+    m = glm::rotate(m, float(glm::radians(90.0)), glm::vec3(1.0f, 0.0f, 0.0f));
 
     glm::mat4 mvp = p * v * m;
 
     program.setUniform(mvpLocation, mvp);
     program.setUniform(mLocation, m);
     program.setUniform(lighLocation, lightPos);
+    program.setTexture(textureSamplerLocation, chessBoard, 0);
 
     glDrawElements(GL_TRIANGLES, sphere.getIndices().size(), GL_UNSIGNED_INT, (void*)0);
 
