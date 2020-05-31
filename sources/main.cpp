@@ -56,6 +56,8 @@ int main(int argc, char** argv) {
   GLint vColorLocation = program.getAttribLocation("vColor");
   GLint vTextureCoordLocation = program.getAttribLocation("vTextureCoord");
   GLint textureSamplerLocation = program.getUniformLocation("textureSampler");
+  GLint invVLocation = program.getUniformLocation("invV");
+  
 
   vbPos.connectVertexAttrib(posLocation, 3);
   vbPos.connectVertexAttrib(vColorLocation, 3);
@@ -99,6 +101,7 @@ int main(int argc, char** argv) {
 
     program.setUniform(mvpLocation, mvp);
     program.setUniform(mLocation, m);
+    program.setUniform(invVLocation, glm::inverse(v));
     program.setUniform(lighLocation, lightPos);
     program.setTexture(textureSamplerLocation, chessBoard, 0);
 
