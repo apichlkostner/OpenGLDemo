@@ -24,8 +24,7 @@ int main(int argc, char** argv) {
   gl.setKeyCallback(keyCallback);
 
   // load shaders
-  GLProgram program("shaders/vertex_shader.glsl",
-                    "shaders/fragment_shader.glsl");
+  GLProgram program("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
 
   // graphic
   Tesselation sphere(Tesselation::genSphere({0, 0, 0}, 1, 100, 100));
@@ -39,38 +38,55 @@ int main(int argc, char** argv) {
   GLBuffer vNormals(GL_ARRAY_BUFFER);
   vNormals.setData(sphere.getNormals(), 3);
 
+  GLBuffer vTangents(GL_ARRAY_BUFFER);
+  vTangents.setData(sphere.getTangents(), 3);
+
   GLBuffer ib(GL_ELEMENT_ARRAY_BUFFER);
   ib.setData(sphere.getIndices());
 
-  Image image;
-  image.loadBmp("assets/albedo.bmp");
-  
-  GLTexture2D chessBoard(image.width(), image.height(), image.bits_per_pixel() / 8);  
-  chessBoard.setData(image.data());
+  Image image_albedo;
+  //image_albedo.loadPng("assets/albedo.png");
+  image_albedo.loadBmp("assets/albedo.bmp");
+
+  GLTexture2D textureAlbedo(image_albedo.width(), image_albedo.height(), image_albedo.bits_per_pixel() / 8, GL_LINEAR,
+                            GL_LINEAR);
+  textureAlbedo.setData(image_albedo.data());
+
+  Image image_normal;
+  //image_normal.loadPng("assets/normal.png");
+  image_normal.loadBmp("assets/normal.bmp");
+
+  GLTexture2D textureNormal(image_normal.width(), image_normal.height(), image_normal.bits_per_pixel() / 8, GL_LINEAR,
+                            GL_LINEAR);
+  textureNormal.setData(image_normal.data());
 
   GLint mvpLocation = program.getUniformLocation("MVP");
   GLint mLocation = program.getUniformLocation("M");
+  GLint MInverseTransposeLocation = program.getUniformLocation("MInverseTranspose");
   GLint lighLocation = program.getUniformLocation("vLightPos");
+  GLint textureSamplerLocation = program.getUniformLocation("textureSampler");
+  GLint normalSamplerLocation = program.getUniformLocation("normalSampler");
+  GLint invVLocation = program.getUniformLocation("invV");
+
   GLint posLocation = program.getAttribLocation("vPos");
   GLint normalLocation = program.getAttribLocation("vNormal");
-  GLint vColorLocation = program.getAttribLocation("vColor");
+  GLint tangentLocation = program.getAttribLocation("vTangent");
   GLint vTextureCoordLocation = program.getAttribLocation("vTextureCoord");
-  GLint textureSamplerLocation = program.getUniformLocation("textureSampler");
-  GLint invVLocation = program.getUniformLocation("invV");
-  
 
   vbPos.connectVertexAttrib(posLocation, 3);
-  vbPos.connectVertexAttrib(vColorLocation, 3);
   vNormals.connectVertexAttrib(normalLocation, 3);
+  vTangents.connectVertexAttrib(tangentLocation, 3);
   vTextureCoord.connectVertexAttrib(vTextureCoordLocation, 2);
 
   glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
+  glClearDepth(1.0f);
 
   poll_gl_errors();
 
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
+  glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);  
 
   glm::vec3 lightPos(1., 1., 2);
 
@@ -101,9 +117,11 @@ int main(int argc, char** argv) {
 
     program.setUniform(mvpLocation, mvp);
     program.setUniform(mLocation, m);
+    program.setUniform(MInverseTransposeLocation, glm::transpose(glm::inverse(m)));
     program.setUniform(invVLocation, glm::inverse(v));
     program.setUniform(lighLocation, lightPos);
-    program.setTexture(textureSamplerLocation, chessBoard, 0);
+    program.setTexture(textureSamplerLocation, textureAlbedo, 0);
+    program.setTexture(normalSamplerLocation, textureNormal, 1);
 
     glDrawElements(GL_TRIANGLES, sphere.getIndices().size(), GL_UNSIGNED_INT, (void*)0);
 

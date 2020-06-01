@@ -34,6 +34,11 @@ class Image {
     uint32_t pos_data = *((uint32_t*)&buffer_[10]);
     buffer_.erase(buffer_.begin(), buffer_.begin() + pos_data);
     buffer_.erase(buffer_.begin() + size, buffer_.end());
+
+    // bmp uses BGR order -> change to rgb
+    for (size_t pos = 0; pos < buffer_.size(); pos += 3) {
+      std::swap(buffer_[pos], buffer_[pos + 2]);
+    }
   }
 
 #ifdef USE_PNG
