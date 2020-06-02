@@ -18,7 +18,8 @@ class GLProgram {
   void setUniform(GLint id, const glm::mat4& matrix);
   void setUniform(GLint id, const glm::vec3& vector);
   void setTexture(GLint id, const GLTexture2D& texture, GLuint unit);
-  void use();
+  void enable();
+  void disable();
 
  private:
   void check_shader_compile_errors(GLuint shader);

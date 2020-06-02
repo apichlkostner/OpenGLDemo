@@ -12,10 +12,13 @@
 #include "GLProgram.h"
 #include "GLTexture2D.h"
 #include "Image.h"
+#include "ParticleSystem.h"
 #include "Tesselation.h"
 
 static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 static void poll_gl_errors();
+
+static bool doRotate = true;
 
 int main(int argc, char** argv) {
   GLEnv gl(640, 480, 1, "OpenGL test");
@@ -25,6 +28,8 @@ int main(int argc, char** argv) {
 
   // load shaders
   GLProgram program("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
+
+  ParticleSystem particleSystem(1000, {0., 2., 0.}, 2., {0., -9.81, 0.}, 2., 20., {0.9, 0.9, 0.9});
 
   // graphic
   Tesselation sphere(Tesselation::genSphere({0, 0, 0}, 1, 100, 100));
@@ -45,16 +50,16 @@ int main(int argc, char** argv) {
   ib.setData(sphere.getIndices());
 
   Image image_albedo;
-  //image_albedo.loadPng("assets/albedo.png");
-  image_albedo.loadBmp("assets/albedo.bmp");
+  image_albedo.loadPng("assets/earthDiffuse.png");
+  //image_albedo.loadBmp("assets/albedo.bmp");
 
   GLTexture2D textureAlbedo(image_albedo.width(), image_albedo.height(), image_albedo.bits_per_pixel() / 8, GL_LINEAR,
                             GL_LINEAR);
   textureAlbedo.setData(image_albedo.data());
 
   Image image_normal;
-  //image_normal.loadPng("assets/normal.png");
-  image_normal.loadBmp("assets/normal.bmp");
+  image_normal.loadPng("assets/earthNormal.png");
+  // image_normal.loadBmp("assets/normal.bmp");
 
   GLTexture2D textureNormal(image_normal.width(), image_normal.height(), image_normal.bits_per_pixel() / 8, GL_LINEAR,
                             GL_LINEAR);
@@ -73,12 +78,7 @@ int main(int argc, char** argv) {
   GLint tangentLocation = program.getAttribLocation("vTangent");
   GLint vTextureCoordLocation = program.getAttribLocation("vTextureCoord");
 
-  vbPos.connectVertexAttrib(posLocation, 3);
-  vNormals.connectVertexAttrib(normalLocation, 3);
-  vTangents.connectVertexAttrib(tangentLocation, 3);
-  vTextureCoord.connectVertexAttrib(vTextureCoordLocation, 2);
-
-  glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
+  glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
   glClearDepth(1.0f);
 
   poll_gl_errors();
@@ -86,12 +86,12 @@ int main(int argc, char** argv) {
   glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
   glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);  
+  glDepthFunc(GL_LESS);
 
   glm::vec3 lightPos(1., 1., 2);
 
-  // std::cout << "indices: " << sphere.getIndices().size() << " vertices: " << sphere.getVertices().size() <<
-  // std::endl;
+  float rot_angle = 0.0;
+  float last_time = 0.0;
 
   while (!gl.shouldClose()) {
     auto frameSize = gl.getFrameBufferSize();
@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport(0, 0, frameSize[0], frameSize[1]);
-    program.use();
+    program.enable();
 
     glm::mat4 p =
         glm::perspective(glm::radians<float>(90),  // The vertical Field of View, in radians: the amount of "zoom".
@@ -110,11 +110,17 @@ int main(int argc, char** argv) {
 
     glm::mat4 v = glm::lookAt(glm::vec3{0., 0., 2.}, glm::vec3{0., 0., 0.}, glm::vec3{0., 1., 0.});
 
-    glm::mat4 m = glm::rotate(glm::mat4(1.0f), float(glfwGetTime()), glm::vec3(0.0f, 1.0f, 0.0f));
+    if (doRotate) {
+      rot_angle += float(glfwGetTime()) - last_time;
+    }
+    last_time = float(glfwGetTime());
+
+    glm::mat4 m = glm::rotate(glm::mat4(1.0f), rot_angle, glm::vec3(0.0f, 1.0f, 0.0f));
     m = glm::rotate(m, float(glm::radians(90.0)), glm::vec3(1.0f, 0.0f, 0.0f));
 
     glm::mat4 mvp = p * v * m;
 
+    // Sphere
     program.setUniform(mvpLocation, mvp);
     program.setUniform(mLocation, m);
     program.setUniform(MInverseTransposeLocation, glm::transpose(glm::inverse(m)));
@@ -123,7 +129,17 @@ int main(int argc, char** argv) {
     program.setTexture(textureSamplerLocation, textureAlbedo, 0);
     program.setTexture(normalSamplerLocation, textureNormal, 1);
 
+    vbPos.connectVertexAttrib(posLocation, 3);
+    vNormals.connectVertexAttrib(normalLocation, 3);
+    vTangents.connectVertexAttrib(tangentLocation, 3);
+    vTextureCoord.connectVertexAttrib(vTextureCoordLocation, 2);
+    ib.bind();
+
     glDrawElements(GL_TRIANGLES, sphere.getIndices().size(), GL_UNSIGNED_INT, (void*)0);
+
+    // Particles
+    particleSystem.render(v, p);
+    particleSystem.update();
 
     gl.endOfFrame();
 
@@ -143,5 +159,8 @@ static void poll_gl_errors() {
 static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
   if ((key == GLFW_KEY_ESCAPE) && (action == GLFW_PRESS)) {
     glfwSetWindowShouldClose(window, GL_TRUE);
+  }
+  if ((key == GLFW_KEY_R) && (action == GLFW_PRESS)) {
+    doRotate = !doRotate;
   }
 }

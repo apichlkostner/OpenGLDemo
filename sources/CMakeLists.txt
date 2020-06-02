@@ -9,7 +9,7 @@ find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
 
 # add the executable
-add_executable(opengltest main.cpp GLEnv.cpp GLProgram.cpp GLBuffer.cpp Tesselation.cpp GLTexture2D.cpp)
+add_executable(opengltest main.cpp GLEnv.cpp GLProgram.cpp GLBuffer.cpp Tesselation.cpp GLTexture2D.cpp Particle.cpp ParticleSystem.cpp)
 
 target_include_directories(opengltest PRIVATE ${PROJECT_SOURCE_DIR}/include
                                 PUBLIC "${PROJECT_BINARY_DIR}"

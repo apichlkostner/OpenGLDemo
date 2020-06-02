@@ -64,7 +64,9 @@ void GLProgram::setTexture(GLint id, const GLTexture2D& texture, GLuint unit) {
   glUniform1i(id, unit);
 }
 
-void GLProgram::use() { glUseProgram(program_); }
+void GLProgram::enable() { glUseProgram(program_); }
+
+void GLProgram::disable() { glUseProgram(0); }
 
 void GLProgram::check_shader_compile_errors(GLuint shader) {
   GLint result = GL_FALSE;

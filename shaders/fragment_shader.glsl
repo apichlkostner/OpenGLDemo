@@ -16,7 +16,8 @@ void main() {
   vec3 direction = normalize(vLightPos - pos);
   vec3 nnormal = normalize(normal); // normalize interpolated value
   vec3 ntangent = normalize(tangent); // normalize interpolated value
-  vec3 nbinorm = normalize(cross(ntangent, nnormal));
+  vec3 nbinorm = normalize(cross(nnormal, ntangent));
+  //vec3 nbinorm = normalize(cross(ntangent, nnormal));
 
   // albedo and normal map
   vec4 textureVal = texture(textureSampler, textureCoord);

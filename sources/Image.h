@@ -51,9 +51,9 @@ class Image {
     // copy image to the buffer vector
     for (uint32_t x = 0; x < texture_image.get_width(); x++) {
       for (uint32_t y = 0; y < texture_image.get_height(); y++) {
-        buffer_.push_back(texture_image[x][y].red);
-        buffer_.push_back(texture_image[x][y].green);
-        buffer_.push_back(texture_image[x][y].blue);
+        buffer_.push_back(texture_image[y][x].red);
+        buffer_.push_back(texture_image[y][x].green);
+        buffer_.push_back(texture_image[y][x].blue);
       }
     }
   }
