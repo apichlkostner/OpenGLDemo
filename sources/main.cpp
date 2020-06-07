@@ -50,16 +50,14 @@ int main(int argc, char** argv) {
   ib.setData(sphere.getIndices());
 
   Image image_albedo;
-  image_albedo.loadPng("assets/earthDiffuse.png");
-  //image_albedo.loadBmp("assets/albedo.bmp");
+  image_albedo.loadPng("assets/football-diffuse-512.png");
 
   GLTexture2D textureAlbedo(image_albedo.width(), image_albedo.height(), image_albedo.bits_per_pixel() / 8, GL_LINEAR,
                             GL_LINEAR);
   textureAlbedo.setData(image_albedo.data());
 
   Image image_normal;
-  image_normal.loadPng("assets/earthNormal.png");
-  // image_normal.loadBmp("assets/normal.bmp");
+  image_normal.loadPng("assets/football-normals-512.png");
 
   GLTexture2D textureNormal(image_normal.width(), image_normal.height(), image_normal.bits_per_pixel() / 8, GL_LINEAR,
                             GL_LINEAR);

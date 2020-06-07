@@ -25,7 +25,7 @@ else()
      message(INFO " png++ not available")
 endif()
 
-target_link_libraries(opengltest pthread GLEW glfw OpenGL::GL glm)
+target_link_libraries(opengltest GLEW glfw OpenGL::GL glm::glm)
 
 # add the install targets
 install(TARGETS opengltest DESTINATION bin)

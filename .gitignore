@@ -1,2 +1,5 @@
 build
 original
+assets/**/*.jpg
+assets/**/*.png
+assets/**/*.bmp
